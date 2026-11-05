@@ -38,7 +38,7 @@ const stats = [
 
 const Banner = () => {
   return (
-    <section className="relative isolate mx-auto overflow-hidden bg-gradient-to-br from-violet-700 via-purple-600 to-fuchsia-500 text-white lg:mt-4 lg:rounded-2xl">
+    <section className="relative isolate mx-auto overflow-hidden bg-linear-to-br from-violet-700 via-purple-600 to-fuchsia-500 text-white lg:mt-4 lg:rounded-2xl">
       {/* Background decorations */}
       <div
         aria-hidden="true"

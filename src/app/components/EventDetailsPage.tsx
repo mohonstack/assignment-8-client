@@ -1,6 +1,6 @@
 'use client'
 import { useRouter } from "next/navigation";
-import { useSession } from "@/lib/auth-client";
+import { useSession } from "../lib/auth-client";
 import { Itypes } from "@/type";
 
 const formatDate = (date: string) => {
@@ -56,10 +56,10 @@ const EventDetailsPage = ({ eventData }: { eventData: Itypes }) => {
     <main className="bg-base-100 px-4 py-8 sm:px-8 lg:px-16 lg:py-12">
       <article className="mx-auto max-w-6xl overflow-hidden rounded-[2rem] border border-violet-100 bg-base-100 shadow-xl shadow-violet-100/70">
         <div
-          className="relative flex min-h-[22rem] items-end bg-cover bg-center px-6 py-8 sm:px-10 lg:px-12"
+          className="relative flex min-h-88 items-end bg-cover bg-center px-6 py-8 sm:px-10 lg:px-12"
           style={{ backgroundImage: `url("${eventData.image}")` }}
         >
-          <div className="absolute inset-0 bg-gradient-to-t from-violet-950/90 via-violet-950/25 to-transparent" />
+          <div className="absolute inset-0 bg-linear-to-t from-violet-950/90 via-violet-950/25 to-transparent" />
           <div className="relative w-full">
             <span className="mb-5 inline-flex items-center gap-2 rounded-full bg-violet-100 px-4 py-2 text-xs font-bold text-violet-700 shadow-sm">
               <span aria-hidden="true" className="h-2 w-2 rounded-full bg-violet-500" />

@@ -2,7 +2,7 @@
 
 import { type FormEvent, type ReactNode, useState } from "react";
 import { Button, Label, TextArea } from "@heroui/react";
-import { useSession } from "@/lib/auth-client";
+import { useSession } from "../lib/auth-client";
 
 const eventTypes = [
     "Donation",
@@ -71,7 +71,7 @@ const CreateEventForm = () => {
 
     return (
         <main className="min-h-screen bg-base-100 px-4 py-10 sm:px-6 sm:py-14">
-            <div className="mx-auto bg-base-100 max-w-[630px] rounded-xl border border-slate-200  px-5 py-7 shadow-[0_8px_24px_rgba(15,23,42,0.08)] sm:px-9 sm:py-8">
+            <div className="mx-auto bg-base-100 max-w-157.5 rounded-xl border border-slate-200  px-5 py-7 shadow-[0_8px_24px_rgba(15,23,42,0.08)] sm:px-9 sm:py-8">
                 <div className="mb-8">
                     <span className="inline-flex items-center gap-2 rounded-full bg-violet-50 px-3 py-1 text-xs font-bold text-violet-600">
                         <span aria-hidden="true">✣</span>
