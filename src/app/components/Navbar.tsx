@@ -1,211 +1,358 @@
+
 "use client";
 
 import Link from "next/link";
 import { useEffect, useState } from "react";
-import { CircleCheck, CirclePlus, LogOut, Settings, Sun, Moon } from "lucide-react";
-import { signOut, useSession } from "@/lib/auth-client";
+import {
+  Aperture,
+  Menu,
+  X,
+  Sun,
+  Moon,
+  User,
+  LayoutDashboard,
+  PlusCircle,
+  Building2,
+  CalendarDays,
+  LogOut,
+  ChevronDown,
+} from "lucide-react";
+
+import { authClient } from "../lib/auth-client";
+
+const navigation = [
+  { name: "Home", href: "/" },
+  { name: "Explore Studios", href: "/studios" },
+  { name: "How It Works", href: "/how-it-works" },
+  { name: "About Us", href: "/about" },
+];
+
+const accountLinks = [
+  {
+    name: "Dashboard",
+    href: "/dashboard",
+    icon: LayoutDashboard,
+  },
+  {
+    name: "Add New Studio",
+    href: "/add-studio",
+    icon: PlusCircle,
+  },
+  {
+    name: "My Studio Listings",
+    href: "/my-listings",
+    icon: Building2,
+  },
+  {
+    name: "My Bookings",
+    href: "/my-bookings",
+    icon: CalendarDays,
+  },
+];
 
 const Navbar = () => {
+  const { data: session, isPending } = authClient.useSession();
 
+  const user = session?.user;
 
-  const [darkMode, setDarkMode] = useState(() => {
-    if (typeof window === "undefined") {
-      return false;
-    }
+  const [darkMode, setDarkMode] = useState(false);
+  const [mounted, setMounted] = useState(false);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [profileMenuOpen, setProfileMenuOpen] = useState(false);
 
-    return window.localStorage.getItem("theme") === "dark";
-  });
+  // Initialize theme after mounting to avoid hydration mismatch
+useEffect(() => {
+    const savedTheme = localStorage.getItem("theme") || "light";
 
-  useEffect(() => {
-    document.documentElement.setAttribute("data-theme", darkMode ? "dark" : "light");
-  }, [darkMode]);
+    document.documentElement.setAttribute("data-theme", savedTheme);
 
-  const toggleTheme = () => {
-    if (darkMode) {
-      localStorage.setItem("theme", "light");
-      setDarkMode(false);
-    } else {
-      localStorage.setItem("theme", "dark");
-      setDarkMode(true);
+    setDarkMode(savedTheme === "dark");
+    setMounted(true);
+}, []);
+
+const toggleTheme = () => {
+    const nextTheme = darkMode ? "light" : "dark";
+
+    localStorage.setItem("theme", nextTheme);
+    document.documentElement.setAttribute("data-theme", nextTheme);
+
+    setDarkMode(nextTheme === "dark");
+};
+  // Logout
+  const handleLogout = async () => {
+    try {
+      await authClient.signOut();
+      setProfileMenuOpen(false);
+      setMobileMenuOpen(false);
+    } catch (error) {
+      console.error("Logout failed:", error);
     }
   };
 
-
-  const { data: session } = useSession();
-  const user = session?.user;
-  const [isProfileOpen, setIsProfileOpen] = useState(false);
-  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-  const avatar = (
-    <div className="avatar placeholder">
-      <div className="flex h-10 w-10 items-center justify-center overflow-hidden rounded-full bg-violet-100 text-sm font-bold text-violet-700 ring-2 ring-violet-200">
-        {user?.image ? (
-          <span
-            aria-hidden="true"
-            className="h-full w-full bg-cover bg-center"
-            style={{ backgroundImage: `url("${user.image}")` }}
-          />
-        ) : (
-          user?.name?.charAt(0).toUpperCase()
-        )}
-      </div>
-    </div>
-  );
+  // Close mobile menu after navigation
+  const closeMenus = () => {
+    setMobileMenuOpen(false);
+    setProfileMenuOpen(false);
+  };
 
   return (
-    <header className="navbar sticky top-0 z-50 border-b border-violet-200/70 bg-base-100 shadow-sm backdrop-blur">
-      <div className="mx-auto flex w-full max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
-        <Link href="/" className=" navbar-start flex items-center gap-3">
-          <span className="flex h-11 w-11 items-center justify-center rounded-xl bg-violet-700 text-white shadow-lg ">
-            <svg aria-hidden="true" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="1.8">
-              <path strokeLinecap="round" strokeLinejoin="round" d="M12 21a9 9 0 1 0 0-18 9 9 0 0 0 0 18Z" />
-              <path strokeLinecap="round" strokeLinejoin="round" d="M8.5 12.5 11 15l4.5-6" />
-            </svg>
+    <header className="sticky top-0 z-50 border-b border-base-300 bg-base-100/90 shadow-sm backdrop-blur-xl">
+
+      <nav className="mx-auto flex h-20 max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
+
+        {/* Logo */}
+        <Link
+          href="/"
+          onClick={closeMenus}
+          className="flex shrink-0 items-center gap-2.5"
+        >
+          <span className="flex h-11 w-11 items-center justify-center rounded-xl bg-lime-400 text-black shadow-md">
+            <Aperture size={27} strokeWidth={2.2} />
           </span>
-          <div>
-            <span className="text-lg font-bold tracking-tight text-black">
-              Impact<span className="text-violet-600">Connect</span>
+
+          <span className="text-xl font-extrabold tracking-tight text-base-content">
+            Studio<span className="text-lime-500">Space</span>
+            <span className="mt-0.5 block text-[10px] font-medium tracking-[0.2em] text-base-content/50">
+              CREATE WITHOUT LIMITS
             </span>
-            <p className="text-slate-500 text-xs">Creating Impact</p>
-          </div>
+          </span>
         </Link>
 
-        <div className="navbar-center hidden md:flex">
-          <Link
-            href="/events"
-            className="btn btn-ghost rounded-full px-5 text-sm font-semibold text-violet-800 hover:bg-violet-50 hover:text-violet-950"
-          >
-            Upcoming Events
-          </Link>
+        {/* Desktop Navigation */}
+        <div className="hidden items-center gap-8 lg:flex">
+          {navigation.map((item) => (
+            <Link
+              key={item.href}
+              href={item.href}
+              className="text-sm font-semibold text-base-content/70 transition-colors hover:text-lime-600"
+            >
+              {item.name}
+            </Link>
+          ))}
         </div>
 
-        <div className="navbar-end gap-2">
+        {/* Right Actions */}
+        <div className="flex items-center gap-2">
 
-
-
+          {/* Theme Toggle */}
           <button
+            type="button"
             onClick={toggleTheme}
-            aria-label="Toggle Theme"
-            className="btn btn-circle btn-ghost"
+            aria-label="Toggle theme"
+            className="flex h-10 w-10 items-center justify-center rounded-full text-base-content transition hover:bg-base-200"
           >
-            {darkMode ? <Sun size={20} className="text-yellow-400" /> : <Moon size={20} />}
+            {mounted && darkMode ? (
+              <Sun size={20} />
+            ) : (
+              <Moon size={20} />
+            )}
           </button>
 
+          {/* Authentication */}
+          {!isPending && (
+            <>
+              {user ? (
+                <div className="relative hidden md:block">
 
+                  {/* Profile Button */}
+                  <button
+                    type="button"
+                    onClick={() =>
+                      setProfileMenuOpen((previous) => !previous)
+                    }
+                    aria-expanded={profileMenuOpen}
+                    aria-label="Open profile menu"
+                    className="flex items-center gap-2 rounded-full border border-base-300 p-1.5 pr-3 transition hover:border-lime-400"
+                  >
+                    {user.image ? (
+                      <img
+                        src={user.image}
+                        alt={user.name || "User"}
+                        className="h-9 w-9 rounded-full object-cover"
+                      />
+                    ) : (
+                      <span className="flex h-9 w-9 items-center justify-center rounded-full bg-lime-400 font-bold text-black">
+                        {user.name?.charAt(0).toUpperCase() || "U"}
+                      </span>
+                    )}
 
-          {user ? (
-            <div className="dropdown dropdown-end hidden md:block">
-              <button
-                type="button"
-                tabIndex={0}
-                aria-label="Open account menu"
-                className="btn btn-ghost btn-circle h-auto min-h-0 border-0 p-0 shadow-none outline-none transition-shadow duration-200 hover:bg-transparent hover:shadow-xl hover:shadow-violet-300/80 focus:border-0 focus:bg-transparent focus:outline-none focus:ring-0 active:border-0 active:bg-transparent active:shadow-2xl active:shadow-violet-300/80"
-              >
-                {avatar}
-              </button>
-              <ul
-                tabIndex={0}
-                className="menu dropdown-content z-50 mt-3 w-64 rounded-2xl border border-violet-100 bg-white p-2 text-slate-700 shadow-xl shadow-violet-200/50"
-              >
-                <li className="pointer-events-none mb-1 border-b border-violet-100 px-3 py-2">
-                  <span className="block p-0">
-                    <strong className="text-violet-950">{user.name}</strong>
-                    <small className="block truncate text-slate-500">{user.email}</small>
-                  </span>
-                </li>
-                <li>
-                  <Link href="/createEventForm" className="flex items-center gap-2">
-                    <CirclePlus aria-hidden="true" size={17} className="text-violet-600" />
-                    Create Event
-                  </Link>
-                </li>
-                <li>
-                  <Link href="/manageEvents" className="flex items-center gap-2">
-                    <Settings aria-hidden="true" size={17} className="text-violet-600" />
-                    Manage Events
-                  </Link>
-                </li>
-                <li>
-                  <Link href="/joinedEvents" className="flex items-center gap-2">
-                    <CircleCheck aria-hidden="true" size={17} className="text-violet-600" />
-                    Joined Events
-                  </Link>
-                </li>
-                <li className="mt-1 border-t border-violet-100 pt-1">
-                  <button type="button" onClick={() => signOut()} className="text-red-500 hover:bg-red-50">
-                    <LogOut aria-hidden="true" size={17} />
-                    Log Out
+                    <ChevronDown
+                      size={16}
+                      className={`transition-transform ${
+                        profileMenuOpen ? "rotate-180" : ""
+                      }`}
+                    />
                   </button>
-                </li>
-              </ul>
-            </div>
-          ) : (
-            <Link href="/login" className="btn hidden rounded-full border-0 bg-violet-700 px-5 text-sm font-semibold text-white hover:bg-violet-800 md:inline-flex">
-              Login
-            </Link>
+
+                  {/* Profile Dropdown */}
+                  {profileMenuOpen && (
+                    <div className="absolute right-0 top-full mt-3 w-64 rounded-2xl border border-base-300 bg-base-100 p-2 shadow-xl">
+
+                      <div className="border-b border-base-300 px-3 py-3">
+                        <p className="truncate font-bold text-base-content">
+                          {user.name}
+                        </p>
+                        <p className="truncate text-xs text-base-content/50">
+                          {user.email}
+                        </p>
+                      </div>
+
+                      <div className="py-2">
+                        {accountLinks.map((item) => {
+                          const Icon = item.icon;
+
+                          return (
+                            <Link
+                              key={item.href}
+                              href={item.href}
+                              onClick={closeMenus}
+                              className="flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm text-base-content/80 transition hover:bg-base-200 hover:text-lime-600"
+                            >
+                              <Icon size={18} />
+                              {item.name}
+                            </Link>
+                          );
+                        })}
+                      </div>
+
+                      <div className="border-t border-base-300 pt-2">
+                        <button
+                          type="button"
+                          onClick={handleLogout}
+                          className="flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-semibold text-red-500 transition hover:bg-red-500/10"
+                        >
+                          <LogOut size={18} />
+                          Logout
+                        </button>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              ) : (
+                <div className="hidden items-center gap-3 md:flex">
+                  <Link
+                    href="/login"
+                    className="rounded-full px-5 py-2.5 text-sm font-semibold text-base-content transition hover:bg-base-200"
+                  >
+                    Login
+                  </Link>
+
+                  <Link
+                    href="/register"
+                    className="rounded-full bg-lime-400 px-5 py-2.5 text-sm font-bold text-black transition hover:bg-lime-300"
+                  >
+                    Get Started
+                  </Link>
+                </div>
+              )}
+            </>
           )}
 
-          <div className="relative md:hidden">
-            <button
-              type="button"
-              tabIndex={0}
-              aria-label="Open mobile navigation"
-              onClick={() => setIsMobileMenuOpen((open) => !open)}
-              className="btn btn-ghost btn-square border-0 text-violet-700 outline-none hover:bg-transparent focus:border-0 focus:bg-transparent focus:outline-none focus:ring-0"
-            >
-              <span className="text-xl">{isMobileMenuOpen ? "×" : "☰"}</span>
-            </button>
-            {isMobileMenuOpen && (
-              <ul
-                tabIndex={0}
-                className="menu absolute right-0 top-full z-50 mt-3 w-64 rounded-2xl border border-violet-100 bg-white p-2 text-slate-700 shadow-xl shadow-violet-200/50"
-              >
-                {user ? (
-                  <>
-                    <li>
-                      <button type="button" onClick={() => setIsProfileOpen((open) => !open)} className="flex items-center gap-3">
-                        {avatar}
-                        <span className="min-w-0 text-left">
-                          <strong className="block truncate text-violet-950">{user.name}</strong>
+          {/* Mobile Menu Button */}
+          <button
+            type="button"
+            onClick={() => setMobileMenuOpen((previous) => !previous)}
+            aria-label="Toggle mobile menu"
+            aria-expanded={mobileMenuOpen}
+            className="flex h-10 w-10 items-center justify-center rounded-lg text-base-content transition hover:bg-base-200 lg:hidden"
+          >
+            {mobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
+          </button>
+        </div>
+      </nav>
 
-                        </span>
-                      </button>
-                    </li>
-                    {isProfileOpen && (
-                      <li className="border-t border-violet-100 pt-1">
-                        <li>
-                          <Link href="/createEventForm" className="flex items-center gap-2">
-                            <CirclePlus aria-hidden="true" size={17} className="text-violet-600" />
-                            Create Event
-                          </Link>
-                        </li>
-                        <li>
-                          <Link href="/manageEvents" className="flex items-center gap-2">
-                            <Settings aria-hidden="true" size={17} className="text-violet-600" />
-                            Manage Events
-                          </Link>
-                        </li>
-                        <li>
-                          <Link href="/joinedEvents" className="flex items-center gap-2">
-                            <CircleCheck aria-hidden="true" size={17} className="text-violet-600" />
-                            Joined Events
-                          </Link>
-                        </li>
-                        <button type="button" onClick={() => signOut()} className="text-red-500 hover:bg-red-50">
-                          <LogOut aria-hidden="true" size={17} />
-                          Log Out
-                        </button>
-                      </li>
+      {/* Mobile Navigation */}
+      {mobileMenuOpen && (
+        <div className="border-t border-base-300 bg-base-100 px-4 py-5 shadow-lg lg:hidden">
+
+          <div className="mx-auto max-w-7xl space-y-2">
+
+            {navigation.map((item) => (
+              <Link
+                key={item.href}
+                href={item.href}
+                onClick={closeMenus}
+                className="block rounded-xl px-4 py-3 text-sm font-semibold text-base-content/80 transition hover:bg-base-200 hover:text-lime-600"
+              >
+                {item.name}
+              </Link>
+            ))}
+
+            <div className="border-t border-base-300 pt-3">
+
+              {user ? (
+                <>
+                  <div className="mb-3 flex items-center gap-3 px-3 py-2">
+                    {user.image ? (
+                      <img
+                        src={user.image}
+                        alt={user.name || "User"}
+                        className="h-10 w-10 rounded-full object-cover"
+                      />
+                    ) : (
+                      <span className="flex h-10 w-10 items-center justify-center rounded-full bg-lime-400 font-bold text-black">
+                        {user.name?.charAt(0).toUpperCase() || "U"}
+                      </span>
                     )}
-                  </>
-                ) : (
-                  <li><Link href="/login">Login</Link></li>
-                )}
-                <li><Link href="/events">Upcoming Events</Link></li>
-              </ul>
-            )}
+
+                    <div className="min-w-0">
+                      <p className="truncate text-sm font-bold text-base-content">
+                        {user.name}
+                      </p>
+                      <p className="truncate text-xs text-base-content/50">
+                        {user.email}
+                      </p>
+                    </div>
+                  </div>
+
+                  {accountLinks.map((item) => {
+                    const Icon = item.icon;
+
+                    return (
+                      <Link
+                        key={item.href}
+                        href={item.href}
+                        onClick={closeMenus}
+                        className="flex items-center gap-3 rounded-xl px-4 py-3 text-sm text-base-content/80 hover:bg-base-200"
+                      >
+                        <Icon size={18} />
+                        {item.name}
+                      </Link>
+                    );
+                  })}
+
+                  <button
+                    type="button"
+                    onClick={handleLogout}
+                    className="mt-2 flex w-full items-center gap-3 rounded-xl px-4 py-3 text-sm font-semibold text-red-500 hover:bg-red-500/10"
+                  >
+                    <LogOut size={18} />
+                    Logout
+                  </button>
+                </>
+              ) : (
+                <div className="flex flex-col gap-2">
+                  <Link
+                    href="/login"
+                    onClick={closeMenus}
+                    className="rounded-xl px-4 py-3 text-center font-semibold hover:bg-base-200"
+                  >
+                    Login
+                  </Link>
+
+                  <Link
+                    href="/register"
+                    onClick={closeMenus}
+                    className="rounded-xl bg-lime-400 px-4 py-3 text-center font-bold text-black hover:bg-lime-300"
+                  >
+                    Get Started
+                  </Link>
+                </div>
+              )}
+            </div>
           </div>
         </div>
-      </div>
+      )}
     </header>
   );
 };
