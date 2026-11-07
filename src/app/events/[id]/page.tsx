@@ -1,5 +1,6 @@
-import EventDetailsPage from '@/components/EventDetailsPage';
-import { getTokenFromServer } from '@/lib/jwtTokenFromServer';
+import EventDetailsPage from '@/app/components/EventDetailsPage';
+import { getTokenFromServer } from '@/app/lib/jwtTokenFromServer';
+
 import { Itypes } from '@/type';
 import React from 'react';
 
