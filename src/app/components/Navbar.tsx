@@ -17,6 +17,7 @@ import {
 } from "lucide-react";
 
 import { authClient } from "../lib/auth-client";
+import Image from "next/image";
 
 const navigation = [
   { name: "Home", href: "/" },
@@ -180,7 +181,7 @@ const Navbar = () => {
                     className="flex items-center gap-2 rounded-full border border-base-300 p-1.5 pr-3 transition hover:border-lime-400"
                   >
                     {user.image ? (
-                      <img
+                      <Image
                         src={user.image}
                         alt={user.name || "User"}
                         className="h-9 w-9 rounded-full object-cover"
