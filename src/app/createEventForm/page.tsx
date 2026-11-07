@@ -3,6 +3,7 @@
 import { type FormEvent, type ReactNode, useState } from "react";
 import { Button, Label, TextArea } from "@heroui/react";
 import { useSession } from "../lib/auth-client";
+import { useRouter } from "next/navigation";
 
 const eventTypes = [
     "Donation",
@@ -33,16 +34,17 @@ function FieldIcon({ children }: { children: ReactNode }) {
 
 const CreateEventForm = () => {
     const [submitted, setSubmitted] = useState(false);
+    const [errorMessage, setErrorMessage] = useState("");
     const [imageUrl, setImageUrl] = useState("");
     const { data: session } = useSession()
+    const router = useRouter()
     const user = session?.user
-    // console.log(user);
 
     const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
         event.preventDefault();
+        setErrorMessage("");
         const formData = Object.fromEntries(new FormData(event.currentTarget).entries());
         setSubmitted(true);
-        // console.log(formData);
 
         const userData = {
             ...formData,
@@ -52,21 +54,29 @@ const CreateEventForm = () => {
             eventCreationDate: new Date()
         }
 
+        try {
+            const res = await fetch(`${process.env.NEXT_PUBLIC_LOCAL_URL}/form-datas`, {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify(userData)
+            })
 
-        
+            if (!res.ok) {
+                throw new Error(`The event could not be published (${res.status}).`);
+            }
 
-
-
-        const res = await fetch(`${process.env.NEXT_PUBLIC_LOCAL_URL}/form-datas`, {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json",
-            },
-            body: JSON.stringify(userData)
-        })
-
-        const data = await res.json()
-
+            router.push("/manageEvents");
+            router.refresh();
+        } catch (publishError) {
+            setSubmitted(false);
+            setErrorMessage(
+                publishError instanceof Error
+                    ? publishError.message
+                    : "The event could not be published.",
+            );
+        }
     };
 
     return (
@@ -210,9 +220,14 @@ const CreateEventForm = () => {
                         <span aria-hidden="true">⊕</span>
                         Publish Event
                     </Button>
-                    {submitted && (
+                    {submitted && !errorMessage && (
                         <p role="status" className="text-center text-sm font-medium text-teal-700">
-                            Your event is ready to publish.
+                            Publishing your event…
+                        </p>
+                    )}
+                    {errorMessage && (
+                        <p role="alert" className="text-center text-sm font-semibold text-red-600">
+                            {errorMessage}
                         </p>
                     )}
                 </form>

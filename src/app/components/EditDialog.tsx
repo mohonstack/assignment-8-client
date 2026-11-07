@@ -36,7 +36,8 @@ const EditDialog = ({ manageEventData }: { manageEventData: Itypes }) => {
         event.preventDefault();
         const formData = Object.fromEntries(new FormData(event.currentTarget).entries());
 
-        const { _id, ...updatedData } = formData
+        const updatedData = { ...formData };
+        delete updatedData._id;
 
 
         const res = await fetch(`${process.env.NEXT_PUBLIC_LOCAL_URL}/allEvents/${manageEventData._id}`, {
@@ -46,7 +47,7 @@ const EditDialog = ({ manageEventData }: { manageEventData: Itypes }) => {
             },
             body: JSON.stringify(updatedData)
         })
-        const data = await res.json()
+        await res.json()
         router.refresh()
 
         state.close();

@@ -1,4 +1,3 @@
-import Image from "next/image";
 import Banner from "./components/Banner";
 import PlatformFeatures from "./components/Platformdetails";
 import UpcomingEvents from "./components/UpcomingEvents";

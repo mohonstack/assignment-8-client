@@ -1,39 +1,56 @@
 "use client";
 
 import Link from "next/link";
-import { type FormEvent, useState } from "react";
+import { type FormEvent, Suspense, useState } from "react";
 import { Button, Label } from "@heroui/react";
 import { signIn } from "../lib/auth-client";
-import { redirect } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 
-const LoginPage = () => {
+const LoginContent = () => {
+  const router = useRouter();
+  const searchParams = useSearchParams();
   const [showPassword, setShowPassword] = useState(false);
   const [errorMessage, setErrorMessage] = useState("")
 
+  // redirect() is not allowed inside event handlers (it throws an uncaught
+  // NEXT_REDIRECT error), so client-side navigation must go through the router.
+  const getPostLoginPath = () => {
+    const next = searchParams.get("next");
+    return next && next.startsWith("/") ? next : "/";
+  };
   const handleSubmit = async(event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
 
     const formData = new FormData(event.currentTarget);
     const loginData = Object.fromEntries(formData.entries())as{email:string, password:string}
 
-    console.log("Login data:", loginData);
-
-    const { data, error } = await signIn.email({
+    const { error } = await signIn.email({
       ...loginData
     })
 
-    if(data){
-      console.log(data);
-      redirect('/')
+    if(!error){
+      router.push(getPostLoginPath());
+      router.refresh();
     }
     else{
-      setErrorMessage(error?.message as string)
+      setErrorMessage(error.message as string)
+    }
+  };
+
+  const handleGoogleSignIn = async () => {
+    const { error } = await signIn.social({
+      provider: "google",
+      callbackURL: getPostLoginPath(),
+    });
+
+    if (error) {
+      setErrorMessage(error.message as string);
     }
   };
 
   return (
     <main className="flex min-h-[calc(100vh-5rem)] items-center justify-center bg-slate-50 px-4 py-12 sm:py-16">
-      <section className="w-full max-w-[448px] rounded-[1.5rem] border border-violet-100 bg-white px-6 py-8 shadow-xl shadow-violet-100/70 sm:px-8 sm:py-9">
+      <section className="w-full max-w-md rounded-[1.5rem] border border-violet-100 bg-white px-6 py-8 shadow-xl shadow-violet-100/70 sm:px-8 sm:py-9">
         <div className="text-center">
           <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-violet-700 text-white shadow-lg shadow-violet-200">
             <svg
@@ -112,12 +129,6 @@ const LoginPage = () => {
               >
                 Password
               </Label>
-              <Link
-                href="/forgot-password"
-                className="text-xs font-semibold text-violet-600 transition hover:text-violet-800"
-              >
-                Forgot password?
-              </Link>
             </div>
             <div className="flex items-center gap-3 rounded-xl border border-slate-200 bg-slate-50 px-3.5 py-3 shadow-sm transition focus-within:border-violet-500 focus-within:ring-2 focus-within:ring-violet-100">
               <svg
@@ -174,6 +185,7 @@ const LoginPage = () => {
         <Button
           type="button"
           variant="outline"
+          onClick={handleGoogleSignIn}
           className="w-full rounded-xl border-violet-100 bg-white py-3 text-sm font-bold text-violet-950 hover:bg-violet-50"
         >
           <span className="font-black text-fuchsia-500">G</span>
@@ -193,5 +205,12 @@ const LoginPage = () => {
     </main>
   );
 };
+
+// useSearchParams() requires a Suspense boundary for static prerendering.
+const LoginPage = () => (
+  <Suspense fallback={null}>
+    <LoginContent />
+  </Suspense>
+);
 
 export default LoginPage;

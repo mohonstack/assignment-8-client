@@ -19,9 +19,9 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-    title: "StudioSpace | Find Your Creative Space",
+    title: "ImpactConnect | Find Your Community Events",
     description:
-        "Discover, explore and book premium creative studios with StudioSpace.",
+        "Discover, join and organize community events and volunteer drives with ImpactConnect.",
 };
 
 export default function RootLayout({

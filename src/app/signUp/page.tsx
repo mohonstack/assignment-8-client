@@ -4,12 +4,14 @@ import Link from "next/link";
 import { type FormEvent, useState } from "react";
 import { Button, Label } from "@heroui/react";
 import { signUp } from "../lib/auth-client";
-import { redirect } from "next/navigation";
+import { useRouter } from "next/navigation";
 
 const SignUpPage = () => {
+  const router = useRouter();
   const [showPassword, setShowPassword] = useState(false);
   const [emailError, setEmailError] = useState("");
   const [passwordError, setPasswordError] = useState("");
+  const [errorMessage, setErrorMessage] = useState("");
 
   const validateEmail = (value: string) => {
     if (!/^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i.test(value)) {
@@ -35,7 +37,7 @@ const SignUpPage = () => {
 
   const handleOnSubmit = async(event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-
+    setErrorMessage("");
     const formData = new FormData(event.currentTarget);
     const emailValidationError = validateEmail(
       String(formData.get("email") ?? ""),
@@ -61,11 +63,11 @@ const SignUpPage = () => {
     })
 
     if(data){
-        console.log(data);
-        redirect('/')
+        router.push("/");
+        router.refresh();
     }
     else{
-        console.log(error);
+        setErrorMessage(error?.message as string);
     }
 
   };
@@ -101,6 +103,11 @@ const SignUpPage = () => {
           <p className="mt-2 text-sm text-slate-500">
             Join the community and start driving social change
           </p>
+          {errorMessage && (
+            <p className="mt-3 text-sm font-semibold text-red-500" role="alert">
+              {errorMessage}
+            </p>
+          )}
         </div>
 
         <form className="mt-8 space-y-5" onSubmit={handleOnSubmit}>

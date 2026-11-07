@@ -2,17 +2,15 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useSyncExternalStore } from "react";
 import {
   Aperture,
   Menu,
   X,
   Sun,
   Moon,
-  User,
   LayoutDashboard,
   PlusCircle,
-  Building2,
   CalendarDays,
   LogOut,
   ChevronDown,
@@ -22,62 +20,79 @@ import { authClient } from "../lib/auth-client";
 
 const navigation = [
   { name: "Home", href: "/" },
-  { name: "Explore Studios", href: "/studios" },
-  { name: "How It Works", href: "/how-it-works" },
-  { name: "About Us", href: "/about" },
+  { name: "Events", href: "/events" },
+  { name: "Create Event", href: "/createEventForm" },
+  { name: "Manage Events", href: "/manageEvents" },
 ];
 
 const accountLinks = [
   {
-    name: "Dashboard",
-    href: "/dashboard",
+    name: "Manage Events",
+    href: "/manageEvents",
     icon: LayoutDashboard,
   },
   {
-    name: "Add New Studio",
-    href: "/add-studio",
+    name: "Create Event",
+    href: "/createEventForm",
     icon: PlusCircle,
   },
   {
-    name: "My Studio Listings",
-    href: "/my-listings",
-    icon: Building2,
-  },
-  {
-    name: "My Bookings",
-    href: "/my-bookings",
+    name: "Joined Events",
+    href: "/joinedEvents",
     icon: CalendarDays,
   },
 ];
+
+// The theme lives on <html data-theme> (an external system), so it is read
+// through useSyncExternalStore rather than setState-inside-effect. Listeners
+// are notified whenever the attribute changes so the icon re-renders.
+const themeListeners = new Set<() => void>();
+
+const notifyThemeChange = () => {
+  themeListeners.forEach((listener) => listener());
+};
+
+const subscribeTheme = (listener: () => void) => {
+  themeListeners.add(listener);
+  return () => {
+    themeListeners.delete(listener);
+  };
+};
+
+const getThemeSnapshot = () =>
+  document.documentElement.getAttribute("data-theme") === "dark";
+
+const getServerThemeSnapshot = () => false;
 
 const Navbar = () => {
   const { data: session, isPending } = authClient.useSession();
 
   const user = session?.user;
 
-  const [darkMode, setDarkMode] = useState(false);
-  const [mounted, setMounted] = useState(false);
+  const darkMode = useSyncExternalStore(
+    subscribeTheme,
+    getThemeSnapshot,
+    getServerThemeSnapshot,
+  );
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [profileMenuOpen, setProfileMenuOpen] = useState(false);
 
-  // Initialize theme after mounting to avoid hydration mismatch
-useEffect(() => {
+  // Sync the persisted theme onto <html> after hydration (DOM writes are what
+  // effects are for); listeners are notified so the icon follows the attribute.
+  useEffect(() => {
     const savedTheme = localStorage.getItem("theme") || "light";
 
     document.documentElement.setAttribute("data-theme", savedTheme);
+    notifyThemeChange();
+  }, []);
 
-    setDarkMode(savedTheme === "dark");
-    setMounted(true);
-}, []);
-
-const toggleTheme = () => {
+  const toggleTheme = () => {
     const nextTheme = darkMode ? "light" : "dark";
 
     localStorage.setItem("theme", nextTheme);
     document.documentElement.setAttribute("data-theme", nextTheme);
-
-    setDarkMode(nextTheme === "dark");
-};
+    notifyThemeChange();
+  };
   // Logout
   const handleLogout = async () => {
     try {
@@ -111,7 +126,7 @@ const toggleTheme = () => {
           </span>
 
           <span className="text-xl font-extrabold tracking-tight text-base-content">
-            Studio<span className="text-lime-500">Space</span>
+            Impact<span className="text-lime-500">Connect</span>
             <span className="mt-0.5 block text-[10px] font-medium tracking-[0.2em] text-base-content/50">
               CREATE WITHOUT LIMITS
             </span>
@@ -141,7 +156,7 @@ const toggleTheme = () => {
             aria-label="Toggle theme"
             className="flex h-10 w-10 items-center justify-center rounded-full text-base-content transition hover:bg-base-200"
           >
-            {mounted && darkMode ? (
+            {darkMode ? (
               <Sun size={20} />
             ) : (
               <Moon size={20} />
@@ -238,7 +253,7 @@ const toggleTheme = () => {
                   </Link>
 
                   <Link
-                    href="/register"
+                    href="/signUp"
                     className="rounded-full bg-lime-400 px-5 py-2.5 text-sm font-bold text-black transition hover:bg-lime-300"
                   >
                     Get Started
@@ -341,7 +356,7 @@ const toggleTheme = () => {
                   </Link>
 
                   <Link
-                    href="/register"
+                    href="/signUp"
                     onClick={closeMenus}
                     className="rounded-xl bg-lime-400 px-4 py-3 text-center font-bold text-black hover:bg-lime-300"
                   >
