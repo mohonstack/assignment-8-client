@@ -1,10 +1,11 @@
-import ManageEvents from '@/components/ManageEvents';
-import { auth } from '@/lib/auth';
-import { getTokenFromServer } from '@/lib/jwtTokenFromServer';
+
 import { Itypes } from '@/type';
 import { headers } from 'next/headers';
 import Link from 'next/link';
 import React from 'react';
+import { auth } from '../lib/auth';
+import { getTokenFromServer } from '../lib/jwtTokenFromServer';
+import ManageEvents from '../components/ManageEvents';
 
 const ManageEventPage = async() => {
     const session = await auth.api.getSession({
