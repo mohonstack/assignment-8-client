@@ -1,9 +1,9 @@
-import JoinedEvent from '@/components/joinedEvent';
-import { auth } from '@/lib/auth';
-import { getTokenFromServer } from '@/lib/jwtTokenFromServer';
+
 import { Itypes } from '@/type';
 import { headers } from 'next/headers';
-import React from 'react';
+import { auth } from '../lib/auth';
+import { getTokenFromServer } from '../lib/jwtTokenFromServer';
+import JoinedEvent from '../components/joinedEvent';
 
 const JoinedEventPage = async () => {
   const session = await auth.api.getSession({
