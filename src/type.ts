@@ -9,7 +9,8 @@ export interface Itypes {
     userName: string,
    userEmail: string,
    eventCreationDate: string
-   eventId:string
+   // Present on joined-event documents; absent on the source event documents.
+   eventId?: string
 
 }
 

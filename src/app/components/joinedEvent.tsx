@@ -89,7 +89,9 @@ const JoinedEvent = ({ joinedEventData }: { joinedEventData: Itypes }) => {
                     Joined {formatDate(joinedEventData.eventCreationDate)}
                 </p>
 
-                <Link href={`/events/${joinedEventData.eventId}`}
+                {/* Existing joined-event docs predate the eventId field and
+                    carry the event's id as their own _id. */}
+                <Link href={`/events/${joinedEventData.eventId ?? joinedEventData._id}`}
                     type="button"
                    className="mt-5 flex items-center justify-center gap-2 rounded-xl bg-violet-700 px-4 py-3 text-sm font-bold text-white shadow-sm shadow-violet-200 transition hover:bg-violet-800 focus:outline-none focus:ring-2 focus:ring-violet-400 focus:ring-offset-2"
                 >

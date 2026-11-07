@@ -30,8 +30,13 @@ const EventDetailsPage = ({ eventData }: { eventData: Itypes }) => {
   const user = session?.user
 
   const handleJoinEventData = async() => {
+    // Strip the event's _id so MongoDB assigns a fresh one per joined-event
+    // document (otherwise a second user joining the same event would hit a
+    // duplicate-key error), and record which event was joined.
+    const { _id: eventId, ...eventFields } = eventData;
     const joinEventData = {
-      ...eventData,
+      ...eventFields,
+      eventId,
       userName: user?.name,
       userEmail: user?.email,
       userImage: user?.image,

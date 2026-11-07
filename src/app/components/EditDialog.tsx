@@ -47,7 +47,9 @@ const EditDialog = ({ manageEventData }: { manageEventData: Itypes }) => {
             },
             body: JSON.stringify(updatedData)
         })
-        await res.json()
+        // The API answers errors as HTML (Express500), so never assume the
+        // body parses — the result isn't used anyway.
+        await res.json().catch(() => null)
         router.refresh()
 
         state.close();
