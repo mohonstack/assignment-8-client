@@ -31,29 +31,46 @@ const EditDialog = ({ manageEventData }: { manageEventData: Itypes }) => {
     const router = useRouter()
     const state = useOverlayState();
     const [imageUrl, setImageUrl] = useState(manageEventData.image);
+    const [errorMessage, setErrorMessage] = useState("");
+    const [isSaving, setIsSaving] = useState(false);
 
     const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
         event.preventDefault();
+        setErrorMessage("");
+        setIsSaving(true);
         const formData = Object.fromEntries(new FormData(event.currentTarget).entries());
 
         const updatedData = { ...formData };
         delete updatedData._id;
 
+        try {
+            const res = await fetch(`${process.env.NEXT_PUBLIC_LOCAL_URL}/allEvents/${manageEventData._id}`, {
+                method: "PATCH",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify(updatedData)
+            })
 
-        const res = await fetch(`${process.env.NEXT_PUBLIC_LOCAL_URL}/allEvents/${manageEventData._id}`, {
-            method: "PATCH",
-            headers: {
-                "Content-Type": "application/json",
-            },
-            body: JSON.stringify(updatedData)
-        })
-        // The API answers errors as HTML (Express500), so never assume the
-        // body parses — the result isn't used anyway.
-        await res.json().catch(() => null)
-        router.refresh()
+            if (!res.ok) {
+                throw new Error(`The event could not be updated (${res.status}).`);
+            }
 
-        state.close();
+            // The API answers errors as HTML (Express 500), so never assume the
+            // body parses — the result isn't used anyway.
+            await res.json().catch(() => null)
+            router.refresh()
 
+            state.close();
+        } catch (saveError) {
+            setErrorMessage(
+                saveError instanceof Error
+                    ? saveError.message
+                    : "The event could not be updated.",
+            );
+        } finally {
+            setIsSaving(false);
+        }
     };
 
     return (
@@ -61,6 +78,7 @@ const EditDialog = ({ manageEventData }: { manageEventData: Itypes }) => {
             <Modal.Trigger>
                 <button
                     type="button"
+                    onClick={() => setErrorMessage("")}
                     className="inline-flex items-center justify-center gap-1.5 rounded-xl border border-violet-200 bg-violet-50 px-3 py-3 text-sm font-bold text-violet-700 transition hover:bg-violet-100 focus:outline-none focus:ring-2 focus:ring-violet-300 focus:ring-offset-2"
                 >
                     <span aria-hidden="true">✎</span>
@@ -173,10 +191,17 @@ const EditDialog = ({ manageEventData }: { manageEventData: Itypes }) => {
                                         className="w-full"
                                     />
                                 </div>
+                                {errorMessage && (
+                                    <p role="alert" className="rounded-lg bg-rose-50 p-3 text-sm font-semibold text-rose-700">
+                                        {errorMessage}
+                                    </p>
+                                )}
                             </Modal.Body>
                             <Modal.Footer>
-                                <Button type="button" variant="tertiary" onPress={state.close}>Cancel</Button>
-                                <Button className="bg-violet-700" type="submit" variant="primary">Edit Event</Button>
+                                <Button type="button" variant="tertiary" onPress={state.close} isDisabled={isSaving}>Cancel</Button>
+                                <Button className="bg-violet-700" type="submit" variant="primary" isDisabled={isSaving}>
+                                    {isSaving ? "Saving..." : "Edit Event"}
+                                </Button>
                             </Modal.Footer>
                         </form>
                     </Modal.Dialog>

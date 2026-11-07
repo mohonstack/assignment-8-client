@@ -15,7 +15,11 @@ const EventPage = async() => {
         authorization: `Bearer ${token}`
       }
     })
-    const data:Itypes[] = await res.json()
+    // Degrade to an empty list instead of crashing the page when the API is
+    // unreachable or answers with an HTML error body.
+    const data: Itypes[] = res.ok
+      ? await res.json().catch(() => [] as Itypes[])
+      : [];
     
     return (
         <div>

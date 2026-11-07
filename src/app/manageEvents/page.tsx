@@ -19,7 +19,12 @@ const ManageEventPage = async() => {
             authorization: `Bearer ${token}`
         }
     })
-    const data:Itypes[] = await res.json()
+
+    // The API answers failures as HTML (Express 500) — never assume the body
+    // is a JSON array, otherwise data.length below throws a TypeError.
+    const data: Itypes[] = res.ok
+        ? await res.json().catch(() => [] as Itypes[])
+        : [];
 
     return (
         <div>

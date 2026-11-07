@@ -8,4 +8,13 @@ export const authClient = createAuthClient({
     ]
 })
 
-export const { signIn, signUp, useSession,signOut } = createAuthClient()
+/**
+ * Single client instance for the whole app.
+ *
+ * `createAuthClient()` builds its own session atom and its own
+ * `$sessionSignal` listeners, so a second instance would never learn about
+ * sign-ins/sign-outs performed through the first one (e.g. the Navbar would
+ * keep showing "Login" after a successful login on /login). Everything must
+ * therefore be destructured from this one `authClient`.
+ */
+export const { signIn, signUp, useSession, signOut } = authClient;

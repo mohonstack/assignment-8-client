@@ -210,7 +210,7 @@ const CreateEventForm = () => {
 
                     <div className="flex items-center justify-between rounded-xl border border-slate-200 bg-base-100 px-3.5 py-3.5 text-xs text-slate-500">
                         <span>Organizer Email attached:</span>
-                        <strong className="text-[11px] text-slate-700">{user?.name}</strong>
+                        <strong className="text-[11px] text-slate-700">{user?.email}</strong>
                     </div>
 
                     <Button

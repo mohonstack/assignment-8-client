@@ -16,7 +16,12 @@ const LoginContent = () => {
   // NEXT_REDIRECT error), so client-side navigation must go through the router.
   const getPostLoginPath = () => {
     const next = searchParams.get("next");
-    return next && next.startsWith("/") ? next : "/";
+    // Starts with "/" keeps it same-origin; rejecting "//" (and "/\") also
+    // blocks protocol-relative URLs like "//evil.com", which would otherwise
+    // turn this into an open redirect.
+    return next && next.startsWith("/") && !next.startsWith("//") && !next.startsWith("/\\")
+      ? next
+      : "/";
   };
   const handleSubmit = async(event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();

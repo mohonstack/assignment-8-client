@@ -2,8 +2,20 @@ import { Itypes } from '@/type';
 import React from 'react';
 
 const VisualsStorySection = async() => {
-     const res = await fetch (`${process.env.NEXT_PUBLIC_LOCAL_URL}/featured-allEvents`)
-        const data:Itypes[] = await res.json()
+    // Runs during the static prerender of `/` — a missing/unreachable backend
+    // at build time must not fail the build (see UpcomingEvents).
+    let data: Itypes[] = [];
+    const baseUrl = process.env.NEXT_PUBLIC_LOCAL_URL;
+    if (baseUrl) {
+        try {
+            const res = await fetch (`${baseUrl}/featured-allEvents`)
+            if (res.ok) {
+                data = await res.json()
+            }
+        } catch {
+            data = [];
+        }
+    }
     return (
         <div>
             <div className="mx-auto max-w-7xl px-5 pt-10 sm:px-8 lg:px-16">
@@ -21,7 +33,19 @@ const VisualsStorySection = async() => {
                 </p>
             </div>
 
-            <div className="mx-auto grid max-w-7xl gap-6 px-5 py-10 sm:grid-cols-2 sm:px-8 lg:grid-cols-3 lg:px-16">
+            {data.length === 0 ? (
+                <div className="mx-auto max-w-7xl px-5 pb-10 sm:px-8 lg:px-16">
+                    <div className="rounded-2xl border border-dashed border-violet-200 bg-white px-6 py-16 text-center shadow-sm">
+                        <h2 className="text-2xl font-black text-violet-950">
+                            No visual stories yet
+                        </h2>
+                        <p className="mx-auto mt-3 max-w-md text-sm leading-6 text-slate-500">
+                            Photos from our latest volunteer drives will appear here soon.
+                        </p>
+                    </div>
+                </div>
+            ) : (
+                <div className="mx-auto grid max-w-7xl gap-6 px-5 py-10 sm:grid-cols-2 sm:px-8 lg:grid-cols-3 lg:px-16">
                 {data.map((event) => (
                     <article
                         key={event._id}
@@ -56,8 +80,8 @@ const VisualsStorySection = async() => {
                         </div>
                     </article>
                 ))}
-            </div>
-
+                </div>
+            )}
         </div>
     );
 };
