@@ -1,7 +1,8 @@
-import EventCard from "@/components/eventCard";
-import EventFilters from "@/components/EventFilters";
-import { getTokenFromServer } from "@/lib/jwtTokenFromServer";
+
 import { Itypes } from "@/type";
+import EventFilters from "../components/EventFilters";
+import EventCard from "../components/eventCard";
+import { getTokenFromServer } from "../lib/jwtTokenFromServer";
 
 
 const EventPage = async() => {
@@ -48,7 +49,7 @@ const EventPage = async() => {
     </div>
 
     <div className="mt-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-      <EventFilters />
+    <EventFilters />
 
       <div className="flex items-center gap-2 rounded-full border border-violet-100 bg-violet-50 px-4 py-2.5 sm:w-72">
         <span className="text-violet-500">⌕</span>

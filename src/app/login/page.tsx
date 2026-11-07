@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { type FormEvent, useState } from "react";
 import { Button, Label } from "@heroui/react";
-import { signIn } from "@/lib/auth-client";
+import { signIn } from "../lib/auth-client";
 import { redirect } from "next/navigation";
 
 const LoginPage = () => {
